@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+ <link rel="stylesheet" href="{{url_for('static',filename='css/tool.css')}}">
+ 
+ <style>
+    .logo {
+      position: absolute;
+      top: 10px;
+      left: 30px;
+      width: 180px; /* Adjust the width as needed */
+    }
+    
+    .logo2 {
+      position: absolute;
+      top: 10px;
+      right: 30px;
+      width: 180px; /* Adjust the width as needed */
+    }
+    
+ .logo3 {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 180px; /* Adjust the width as needed */
+}
+
+
+    
+    /* Define a class for bordered tables */
+.bordered-table {
+  border-collapse: collapse;
+}
+
+/* Apply borders to all cells */
+.bordered-table td, .bordered-table th {
+  border: 1px solid #ddd; /* You can adjust the border color and size as needed */
+  padding: 8px; /* Adjust the cell padding as needed */
+  text-align: left;
+}
+
+/* Add spacing between table cells */
+.bordered-table td {
+  margin: 0;
+}
+
+/* Add background color on even rows */
+.bordered-table tr:nth-child(even) {
+  background-color: #f2f2f2; /* Adjust the background color as needed */
+}
+/* Add a class for the active row */
+.active-row {
+  background-color: #f2f2f2; /* Adjust the background color as needed */
+}
+ .highlighted-heading {
+    background-color: #3498db; /* Set your desired background color here */
+    color: white; /* Set the text color for better visibility */
+    font-weight: bold;
+    text-transform: uppercase; /* Convert text to uppercase */
+  }
+/* Define a unique style for the heading */
+.unique-heading {
+  font-size: 2rem; /* Adjust the size as needed */
+  color: #FF5733; /* Choose a unique color */
+  font-weight: bold;
+  text-transform: uppercase;
+  border-bottom: 3px solid #FF5733; /* Add a border to the bottom of the heading */
+  padding-bottom: 10px; /* Space between the border and the text */
+  margin-bottom: 20px; /* Space below the heading */
+}
+
+/* Apply the unique style to specific headings */
+h1.unique-heading {
+  font-size: 2.5rem; /* You can customize the size for each heading level */
+}
+
+h2.unique-heading {
+  font-size: 2rem;
+}
+
+h3.unique-heading {
+  font-size: 1.8rem;
+}
+
+.userMetadata {
+  font-size: 1rem; /* Adjust the size as needed */
+  color: #FF5733; /* Choose a unique color */
+  font-weight: bold;
+  text-transform: uppercase;
+  border-bottom: 3px solid #FF5733; /* Add a border to the bottom of the heading */
+  padding-bottom: 10px; /* Space between the border and the text */
+  margin-bottom: 20px; /* Space below the heading */
+}
+.username {
+  font-size: 1rem; /* Adjust the size as needed */
+  color: #0066a1; /* Choose a unique color */
+  font-weight: bold;
+  text-transform: uppercase;
+  
+  padding-bottom: 10px; /* Space between the border and the text */
+  margin-bottom: 20px; /* Space below the heading */
+}
+
+
+  </style>
+</head>
+<body>
+
+ <!-- Add the logo image -->
+  <img src="{{url_for('static', filename='logo.png')}}" alt="Logo" class="logo">
+  <img src="{{url_for('static', filename='logo2.png')}}" alt="Logo" class="logo2">
+  <!-- Div fix will the div fixed on the screen -->
+  <br><br><br><div id="divfix">
+ <!-- Add a section to display user metadata -->
+ <div id="userMetadata">
+    <p><strong class="userMetadata">Username:</strong> <span id="username" class="username"></span></p>
+    
+  </div>
+
+
+    <div class="text-center">
+      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"><a href="/">Home page</a></button>
+    </div><br>
+    <div class="text-center">
+<button id="logoutButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">Logout</button>
+</div>
+
+    <p id="time">00:00:00:000</p>
+
+    <div class="text-center">
+      <label><input type="checkbox" checked="${loop}"> Loop regions on click</label>
+      <label style="margin-left: 2em">Zoom: <input type="range" min="1" max="1000" value={{zoom}} id="zoom"></label>
+    </div>
+
+    <div id="waveform"></div><br>
+
+    <div class="text-center">
+      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full" id="playpause">Play/Pause</button>
+    </div><br>
+     <div class="text-center">
+    <h1 class="unique-heading">Transcription</h1>
+</div>
+    
+    
+
+
+  </div>
+<div>
+    <table class="styled-table bordered-table" id='transcription-table'>
+      <tr class="highlighted-heading"> <!-- Add this class to highlight the heading row -->
+    {% for column in columns %}
+      <td contenteditable="true" name="data_0_{{ loop.index }}">{{ column }}</td>
+    {% endfor %}
+  </tr>
+      {% for row in data %}
+        {% set outer_loop = loop %}
+        <tr>
+          {% for value in row %}
+            <!-- Text Values which can be editted -->
+            {% if loop.index in editable %}
+              <td contenteditable="true" name="data_{{ outer_loop.index }}_{{ loop.index }}" id="data_{{ outer_loop.index }}_{{ loop.index }}" onclick="getCellName(this)">{{ value }}</td>
+
+            <!-- Values which are uneditable -->
+            {% elif loop.index in uneditable %}
+              <td contenteditable="false" name="data_{{ outer_loop.index }}_{{ loop.index }}" id="data_{{ outer_loop.index }}_{{ loop.index }}" onclick="getCellName(this)">{{ value }}</td>
+
+            <!-- Dropdown options -->
+            {% else %}
+              <td contenteditable="true" name="data_{{ outer_loop.index }}_{{loop.index}}" onclick="getCellName(this)">
+                <select id="data_{{ outer_loop.index }}_{{ loop.index }}">
+                  <!-- Speaker id -->
+                  {% if loop.index == 4 %}
+                    {% for option in options %}
+                      {% if option == value %}
+                        <option value="{{ option }}" selected>{{ option }}</option>
+                      {% else %}
+                        <option value="{{ option }}">{{ option }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  <!-- Actual Language -->
+                  {% elif loop.index == 9 %}
+                    {% for option in languages %}
+                      {% if option == value %}
+                        <option value="{{ option }}" selected>{{ option }}</option>
+                      {% else %}
+                        <option value="{{ option }}">{{ option }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                </select>
+            {% endif %}
+          {% endfor %}
+      {% endfor %}
+    </table>
+  </div>
+<div class="text-center">
+    <h2 class="unique-heading">End of Transcription</h2>
+</div>   
+<form id="my-form" method="POST">
+      <div class="text-center">
+        <button id="cl" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow" type="button">Save</button>
+      </div>
+    </form>
+<!-- Discard Button -->
+    <div class="text-center mt-4">
+      <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full" id="discard" onclick="discardAudio()">Discard Audio</button>
+    </div><br>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    // Get the data from table as a dictionary and send it to the server
+    $(document).ready(function() {
+      $("#cl").click(function(event) {
+        event.preventDefault();
+        var formData = {};
+        $("td").each(function() {
+          var name = $(this).attr("name");
+          var value = $(this).text();
+          if (name.endsWith('4') || name.endsWith('9')) {
+            if (name != "data_0_4" && name != "data_0_9") {
+              console.log(name);
+              value = document.getElementById(name).value;
+            }
+          }
+          formData[name] = value;
+        });
+        console.log(formData);
+        $.ajax({
+          url: "/save",
+          type: "POST",
+          contentType: "application/json",
+          data: JSON.stringify(formData),
+          success: function(response) {
+            document.getElementById("hide").click();
+          }
+        });
+      });
+    });
+
+    function formatTime(time) {
+      const hours = Math.floor(time / 3600);
+      const minutes = Math.floor((time % 3600) / 60);
+      const seconds = Math.floor(time % 60);
+      const formattedHours = hours.toString().padStart(2, '0');
+      const formattedMinutes = minutes.toString().padStart(2, '0');
+      const formattedSeconds = seconds.toString().padStart(2, '0');
+      var fromattedMilliseconds = String(time.toString().split(".")[1]).substr(0,3);
+      return `${formattedHours}:${formattedMinutes}:${formattedSeconds}.${fromattedMilliseconds}`;
+    }
+
+    // Get the start time of selected table row and shift the audio player to that time
+    function getCellName(element) {
+      var cellName = $(element).attr("name");
+      cellName=cellName.substr(0,cellName.length-1)+"1"
+      // console.log(cellName)
+      var cellValue = document.getElementById(cellName).innerHTML
+      cur_seg_end = document.getElementById(cellName.substr(0,cellName.length-1)+"2").innerHTML
+      cur_seg_start=cellValue/wavesurfer.getDuration()
+      wavesurfer.seekTo(cur_seg_start)
+    }
+    var cur_seg_end=-1
+    let wavesurfer=0;
+    let cur_seg_start=-1;
+    
+     // Function to handle the discard audio button click
+    function discardAudio() {
+      // Stop the audio playback if playing
+      if (wavesurfer.isPlaying()) {
+        wavesurfer.pause();
+      }
+
+      // Clear any active region and loop status
+      activeRegion = null;
+      loop = false;
+      cur_seg_start = -1;
+      cur_seg_end = -1;
+
+      // Clear the table highlighting
+      var table = document.getElementById('transcription-table');
+      var rows = table.getElementsByTagName('tr');
+      for (var i = 0; i < rows.length; i++) {
+        rows[i].classList.remove('active');
+      }
+
+      // Reset the audio player position to the beginning
+      wavesurfer.seekTo(0);
+
+      // Hide the Discard button
+      document.getElementById('discard').style.display = 'none';
+      
+        window.location.href = 'base';
+    }
+     // Fetch user metadata from the server
+fetch('/get_user_metadata')
+      .then(response => response.json())
+      .then(userMetadata => {
+        // Display user metadata on the webpage
+        const usernameElement = document.getElementById('username');
+        
+        usernameElement.textContent = userMetadata.username;
+        
+      })
+      .catch(error => console.error('Error fetching user metadata:', error));
+
+    
+const logoutButton = document.getElementById('logoutButton'); // Update with the actual ID
+logoutButton.addEventListener('click', () => {
+    fetch('/logout', { method: 'POST' })
+        .then(() => {
+            // Redirect to login page after logout
+            window.location.href = '/login';
+        })
+        .catch(error => console.error('Error logging out:', error));
+});
+
+  </script>
+  <script type="module">
+    import WaveSurfer from '/static/javascript/wavesurfer.js/src/wavesurfer.js';
+    import RegionsPlugin from "/static/javascript/wavesurfer.js/src/plugins/regions.js";
+
+    wavesurfer = WaveSurfer.create({
+      container: '#waveform',
+      waveColor: 'violet',
+      progressColor: 'red',
+      barWidth: 4,
+      height: 150,
+      responsive: true,
+    });
+    const wsRegions = wavesurfer.registerPlugin(RegionsPlugin.create());
+
+    wavesurfer.load("{{wav_path}}");
+
+    // Color for speakers
+    var color = ["rgba(0, 0, 255, 0.3)", "rgba(0, 255, 0, 0.3)"]
+
+    var playPauseButton = document.getElementById('playpause');
+    playPauseButton.addEventListener('click', function() {
+      if (wavesurfer.isPlaying()) {
+        wavesurfer.pause();
+      } else {
+        wavesurfer.play();
+      }
+    });
+    
+    //While running highlight the active table row
+    wavesurfer.on("audioprocess", function() {
+    // Add this code inside the wavesurfer.on("audioprocess", function() {...} section
+
+function highlightActiveSegment(time) {
+  var table = document.getElementById('transcription-table');
+  var rows = table.getElementsByTagName('tr');
+
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    var startTimeCell = row.cells[0];
+    var endTimeCell = row.cells[1];
+    var startTime = parseFloat(startTimeCell.textContent); // Parse as float
+    var endTime = parseFloat(endTimeCell.textContent); // Parse as float
+
+    if (time >= startTime && time <= endTime) {
+      row.classList.add('active');
+    } else {
+      row.classList.remove('active');
+    }
+  }
+}
+
+      const currentTime = wavesurfer.getCurrentTime();
+      document.getElementById("time").innerText = formatTime(currentTime);
+      highlightActiveSegment(currentTime);
+    });
+
+    function highlightActiveSegment(time) {
+      var table = document.getElementById('transcription-table');
+      var rows = table.getElementsByTagName('tr');
+      for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        var startTimeCell = row.cells[0];
+        var endTimeCell = row.cells[1];
+        var startTime = startTimeCell.textContent;
+        var endTime = endTimeCell.textContent;
+        if (time >= startTime && time <= endTime) {
+          row.classList.add('active');
+        } else {
+          row.classList.remove('active');
+        }
+      }
+    }
+
+    // Create array with all details of regions
+    var regions = [];
+    {% for row in data %}
+    regions.push({
+      start: '{{row[0]}}',
+      end: '{{row[1]}}',
+      label: '{{row[2]}}',
+      color: color['{{row[2]}}'.substr(-1,1) % 2], // Highlight color
+      drag: false, // Disable dragging
+      resize: false, // Disable resizing
+      loop: true
+    });
+    {% endfor %}
+
+    // Add the regions to waveform
+    regions.forEach(function(region) {
+      wsRegions.addRegion(region);
+    });
+    wavesurfer.on("decode",()=> {
+    let minPxPerSec = Number(document.getElementById("zoom").value);
+    wavesurfer.zoom(minPxPerSec);
+    });
+
+    let loop = true;
+    let activeRegion = null;
+
+    // When region is clicked, store the region in activeRegion and start playing that region
+    wsRegions.on('region-clicked', (region, e) => {
+      e.stopPropagation();
+      activeRegion = region;
+      region.play();
+
+      // To stop looping the last clicked table row
+      cur_seg_start=-1
+    });
+
+    let orig_color = null;
+
+    //Doesnt seem to work
+    wsRegions.on('region-in', () => {
+      orig_color = region.color;
+      region.setOptions({ color: "red" });
+    });
+
+    wsRegions.on('region-out', (region, e) => {
+      region.setOptions({ color: orig_color });
+    });
+
+    // If loop is true loop the region otherwise dont
+    wavesurfer.on('timeupdate', (currentTime) => {
+      if (activeRegion && wavesurfer.isPlaying() && currentTime >= activeRegion.end) {
+        if (loop) {
+          wavesurfer.setTime(activeRegion.start);
+        }
+
+        else {
+          activeRegion = null;
+        }
+      }
+
+      // Loop if click was done on table
+      if (cur_seg_start!=-1 && wavesurfer.isPlaying() && currentTime >= cur_seg_end ){ 
+          if (loop){
+            wavesurfer.seekTo(cur_seg_start)
+          }
+        }
+    });
+
+    // If click anywhere first set active region to none
+    wavesurfer.on('interaction', () => (activeRegion = null));
+
+    // Check value for loop checkbox
+    document.querySelector('input[type="checkbox"]').onclick = (e) => {
+      loop = e.target.checked;
+      cur_seg_start=-1
+    };
+
+    // Zoom 
+    wavesurfer.once('decode', () => {
+      document.querySelector('input[type="range"]').oninput = (e) => {
+        const minPxPerSec = Number(e.target.value);
+        wavesurfer.zoom(minPxPerSec);
+      };
+    });
+  </script>
+  <a href="/done"><button id="hide" hidden="true">Download</button></a>
+</body>
+
+</html>

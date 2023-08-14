@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign Up</title>
+<style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .login-container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+        }
+        
+        .login-container h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .login-container form {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .login-container input[type="text"],
+        .login-container input[type="password"] {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .login-container input[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .login-container input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        
+        .login-container a {
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .login-container a:hover {
+            text-decoration: underline;
+        }
+        
+        .signup-button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .signup-button:hover {
+            background-color: #218838;
+        }
+        
+        .logo {
+      position: absolute;
+      top: 10px;
+      left: 30px;
+      width: 180px; /* Adjust the width as needed */
+    }
+    
+    .logo2 {
+      position: absolute;
+      top: 10px;
+      right: 30px;
+      width: 180px; /* Adjust the width as needed */
+    }
+    
+ .logo3 {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 180px; /* Adjust the width as needed */
+}
+    </style>
+</head>
+<body>
+<!-- Add the logo image -->
+  <img src="{{url_for('static', filename='logo.png')}}" alt="Logo" class="logo">
+  <img src="{{url_for('static', filename='logo2.png')}}" alt="Logo" class="logo2">
+  <img src="{{url_for('static', filename='logo3.png')}}" alt="Logo" class="logo3">
+    <div class="login-container">
+    <h2>Sign Up</h2>
+    <form method="post" action="/signup">
+        <input type="text" name="username" placeholder="Username" required><br>
+        <input type="password" name="password" placeholder="Password" required><br>
+        <input type="submit" value="Sign Up">
+    </form>
+    <h5> Already have an account? Login here.</h5>
+    <a href="/login" class="signup-button">Login</a>
+</body>
+</html>
+
