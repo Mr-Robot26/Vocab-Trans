@@ -1,0 +1,233 @@
+.styled-table {
+    /* border-collapse: collapse; */
+    border: 1px solid black;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.styled-table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px;
+    border: 1px solid black;
+}
+.active {
+    background-color: yellow;
+  }
+
+.styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+
+
+
+.h1 {
+    font-size: 40px;
+    text-align: center;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+#divfix {
+    overflow: hidden;
+    background-color: #FFFFFB;
+    /* position: fixed; Set the navbar to fixed position */
+    position: sticky;
+    top: 0; /* Position the navbar at the top of the page */
+    width: 100%;
+    opacity: 1;
+}
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f1f1f1;
+    margin: 0;
+    font-size: 10;
+    /* padding: 20px; */
+}
+.table{
+    width: auto;
+    font-size: 10;
+}
+#audioPlayer {
+    margin-bottom: 20px;
+}
+
+/* #rttmContainer {
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+} */
+
+#rttmContainer {
+    /* margin-top: 20px; */
+    /* height: 600px; */
+    /* overflow-y: auto; */
+    /* border: 1px solid #ccc; */
+    padding: 10px;
+}
+
+
+.segment {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.speaker-00 {
+    color: blue;
+    justify-content: left;
+}
+
+#divfix {
+    overflow: hidden;
+    background-color: #FFFFFB;
+    /* position: fixed; Set the navbar to fixed position */
+    position: sticky;
+    top: 0; /* Position the navbar at the top of the page */
+    width: 100%;
+    opacity: 1;
+}
+.speaker-01 {
+    color: green;
+    justify-content: right;
+    margin-left: 20px;
+}
+.Sil {
+    color: red;
+    justify-content: left;
+}
+.center {
+    border: 2px solid;
+    margin: auto;
+    width: 90%;  
+    padding: 10px;
+    margin-top: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .center2 {
+    /* border: 5px solid; */
+    margin: auto;
+    padding: 10px;
+  }
+  .text-center {
+    text-align: center;
+  } 
+
+  .word{
+    margin-left: 50px;
+  }
+
+.summary {
+    display: none;
+}
+
+
+/* Chat containers */
+.chatContainer {
+    border: 2px solid #dedede;
+    background-color: #f1f1f1;
+    width:70%;
+    border-radius: 20px;
+    padding: 10px;
+    margin: 10px 0;
+    color: black;
+  }
+  
+  /* Darker chat container */
+  .darker {
+    border-color: #ccc;
+    background-color: #a0ffa0;
+  }
+  
+  /* Clear floats */
+  .chatContainer::after {
+    content: "";
+    clear: both;
+    display: table;
+  }
+  
+  /* Style images */
+  .chatContainer img {
+    float: left;
+    max-width: 60px;
+    width: 100%;
+    margin-right: 20px;
+    /* border-radius: 150%; */
+  }
+  
+  /* Style the right image */
+  .chatContainer img.right {
+    float: right;
+    margin-left: 20px;
+    margin-right:0;
+  }
+  
+  /* Style time text */
+ 
+  table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #dddddd;
+  }
+
+.logo {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 30%;
+
+}
+
+.type {
+  color:#0000;
+  background:
+    linear-gradient(-90deg,#000000 5px,#0000 0) 10px 0,
+    linear-gradient(#000000 0 0) 0 0;
+  background-size:calc(var(--n)*1ch) 200%;
+  -webkit-background-clip:padding-box,text;
+  background-clip:padding-box,text;
+  background-repeat:no-repeat;
+  animation: 
+   b .7s infinite steps(1),   
+   t calc(var(--n)*.01s) steps(var(--n)) forwards;
+}
+
+@keyframes t{
+  from {background-size:0 200%}
+}
+@keyframes b{
+  50% {background-position:0 -100%,0 0}
+}

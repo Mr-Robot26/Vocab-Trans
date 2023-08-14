@@ -1,0 +1,82 @@
+
+
+.h1 {
+    font-size: 40px;
+    text-align: center;
+  }
+
+
+  #divfix {
+    overflow: hidden;
+    background-color: #FFFFFB;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 1000; /* Add a z-index to make sure the navbar is above other elements */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+  }
+
+  #divfix {
+    padding: 20px;
+  }
+
+  #time {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  #waveform {
+    margin-top: 20px;
+  }
+
+  #playpause {
+    display: block;
+    margin: 20px auto;
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .h1 {
+    text-align: center;
+    margin-top: 40px;
+  }
+
+  .styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #ddd;
+    margin-top: 20px;
+  }
+
+  .styled-table td,
+  .styled-table th {
+    padding: 8px;
+    border: 1px solid #ddd;
+  }
+
+  .styled-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+
+  .styled-table tr.active {
+    background-color: yellow;
+  }
+
+  .text-center {
+    text-align: center;
+  }
