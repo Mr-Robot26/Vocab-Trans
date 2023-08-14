@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>RTTM Player</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.6/flowbite.min.css" rel="stylesheet" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
+  <link href="{{url_for('static',filename='/css/style.css')}}" type="text/css" rel="stylesheet">
+  <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+
+</head>
+
+<body">
+<p id="time" align="center">00:00:00:000</p>
+<img src="{{url_for('static',filename='/images/logo.png')}}" width="100" alt="logo" class="logo" >
+<h1 align="center" style="font-size: 60px; color: darkblue;"><b>Shrunoti</b></h1>
+<p align="center" style="font-size: 15px; color: darkblue;"><b>Listen To Your Customers</b></h1>
+<!-- <img src="{{url_for('static',filename='/images/shrunoti.png')}}" width="100" alt="logo" class="logo" > -->
+
+<div class="container text-center">
+  <!-- <label > <input type="checkbox" checked="${loop}">        Loop regions on click      </label> -->
+  <label  style="margin-left: 2em">        Zoom: <input type="range" min="10" max="1000" value={{zoom}} id="zoom"> </label>
+</div>
+<div id="divfix" class="rounder p-2 m-2">
+<div id="waveform">
+</div>
+</div>
+  
+<div class="text-center m-3 p-3">
+  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-3 rounded-full" id="playpause">Play/Pause</button>
+  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-3 rounded-full"><a href="/done">Download</a></button>
+  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-3 rounded-full" onclick="showSummary()" id="summaryButton">Generate Summary</button>
+  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-3 rounded-full" onclick="showAutoQAResults()" id="autoqa-results-button">Evaluate with Auto-QA</button>
+</div>
+<script src="{{url_for('static',filename='/javascript/wavesurfer.js/src/wavesurfer.js')}}" type="module"></script>
+<script src="{{url_for('static',filename='/javascript/wavesurfer.js/src/plugins/regions.js')}}" type="module"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.6/flowbite.min.js"></script>
+  
+  </div>
+    <!-- <img src="{{pi_path}}"> -->
+    <div class="container-lg mx-auto px-4" style="background-color:white;">
+
+      <div class="grid grid-cols-2 gap-4">
+
+        <div class="p-4">
+          <h2 class="text-xl font-bold mb-4 text-center">MetaData</h2>
+          <table class="table-auto">
+            <tr>
+              <th>Parameter</th>
+              <th>Duration in seconds</th>
+            </tr>
+            {% for line in meta_data %}
+            <tr>
+              {% for data in line %}
+              <td> {{data}}</td>
+              {% endfor %}
+            </tr>
+           {% endfor %}
+          </table>
+        </div>
+
+        <div class="container mx-auto">
+          <div class="">
+            <h2 class="text-xl font-bold mb-4 text-center">Word Cloud</h2>
+            <img src="{{ word_path}}" width="60%" alt="wordcloud" class="mx-auto block" >
+          </div>
+        </div>
+        
+
+      </div>
+      
+    </div>
+
+    
+    <div class="container-lg mx-auto px-4" style="background-color:white;">
+      <h2 class="text-xl font-bold mb-4 text-center">Talktime</h2>
+      <img src="{{ pi_path}}" width="40%" alt="wordcloud" class="mx-auto block">
+    </div>
+        
+
+    <div class="container-lg mx-auto px-4" style="background-color:white;">
+      <div class="grid grid-cols-2 gap-4">
+
+        <div class="p-4">
+          <h2 class="text-xl font-bold mb-4 text-center">Auto-QA</h2>
+      <table>
+        <tr>
+          <th>Parameter</th>
+          <th>Output</th>
+        </tr>
+        <tr>
+          <td>Empathy and Apology</td>
+          <td>Yes</td>
+        </tr>
+        <tr>
+          <td>Reassurance</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td>Appropriate Probing</td>
+          <td>Yes</td>
+        </tr>
+      </table>
+        </div>
+
+        <div class="p-4">
+          <h2 class="text-xl font-bold mb-4 text-center" style="width: 10%;">Chat Summary</h2>
+          <p class="text-justify">
+            Customer wants assistance with payment-related issues, specifically multiple or duplicate payments. The customer is sad because their online payment for a sofa cleaning booking has failed. The agent's role is to apologize for the inconvenience and assure the customer that they will help resolve the issue.
+          </p>
+        </div>
+      </div>
+      
+    </div>
+    
+    
+    <textarea id="area" hidden=true></textarea>
+    <div class="my-4 border-t"></div>
+    <div class="container-lg mx-auto px-4 " style="background-color:white">
+      <h2 class="text-xl font-bold mb-4 p-4 text-center">Automatic Speech Transcription</h2>
+      <div id="rttmContainer" class=" overflow-visible" style=" width:100%; max-height: calc(100vh - 2rem);">
+    </div>
+
+    </div>
+
+    <script type="module">
+    // Define the RTTM data
+    let rttmData;
+    let rttmText;
+    import WaveSurfer from '/static/javascript/wavesurfer.js/src/wavesurfer.js'
+    import RegionsPlugin  from "/static/javascript/wavesurfer.js/src/plugins/regions.js"
+    var wavesurfer = WaveSurfer.create({
+        container: '#waveform',
+        waveColor: 'violet',
+        progressColor: 'purple',
+        barWidth: 5,
+        height: 150,
+        responsive: true,
+      }); 
+  const wsRegions = wavesurfer.registerPlugin(RegionsPlugin.create())
+      
+      // wavesurfer.load("{{url_for('static',filename='temp/temp.wav')}}")
+  wavesurfer.load("{{wav_path}}")
+    // Load the audio file
+    // wavesurfer.load('demo Speech Analytics calls/english/call 2.wav');
+
+    var color=["rgba(0, 0, 255, 0.3)","rgba(0, 255, 0, 0.3)","rgba(255, 0, 0, 0.3)"]
+
+    // Play/Pause button functionality
+    var playPauseButton = document.getElementById('playpause');
+    playPauseButton.addEventListener('click', function() {
+      if (wavesurfer.isPlaying()) {
+        wavesurfer.pause();
+      } else {
+        wavesurfer.play();
+      }
+
+    });
+    wavesurfer.on("audioprocess",function() {
+      // console.log(wavesurfer.getCurrentTime())
+      const currentTime = wavesurfer.getCurrentTime();
+      document.getElementById("time").innerText=formatTime(currentTime)
+      displayActiveSegments()
+    })
+// Get references to the audio player and the RTTM container
+const rttmContainer = document.getElementById('rttmContainer');
+
+// Load the audio file
+
+
+// Function to display the active RTTM segment
+// ...
+
+// Function to display the active RTTM segments
+let previousSpeaker = null; // Track the previous speaker
+
+// Function to display the active segments and keep the previous segments
+function displayActiveSegments() {
+    const currentTime = wavesurfer.getCurrentTime();
+    // console.log(currentTime)
+    if (!rttmData) {
+        wavesurfer.pause();
+        window.alert('Please load the excel data file.');
+        return;
+    }
+    function scrollToTableRow(rowId) {
+  var row = document.getElementById(rowId);
+  var stickyDivHeight = document.getElementById('stickyDiv').offsetHeight;
+  
+  if (row) {
+    var topOffset = row.offsetTop - stickyDivHeight;
+    window.scrollTo({ top: topOffset, behavior: 'smooth' });
+  }
+}
+
+    const activeSegments = rttmData.filter(segment => segment.start_time <= currentTime && segment.end_time >= currentTime);
+
+    activeSegments.forEach(segment => {
+        // Check if the speaker has changed
+        // if (segment.speaker_id !== previousSpeaker) {
+            // console.log("segnment")
+            // console.log(segment)
+            // console.log(segment)
+            if (segment.transcription === ' '){
+              return
+            }
+            const segmentElement = document.createElement('p');
+            segmentElement.classList.add('segment');
+
+            // Assign speaker class based on speaker_id
+            if (segment.speaker_id === '00' || segment.speaker_id === '0' || segment.speaker_id === 'agent') {
+                segmentElement.classList.add('speaker-00');
+                const startFormatted = formatTime(segment.start_time);
+                const endFormatted = formatTime(segment.end_time);
+                if (segment.transcription){
+                  // segmentElement.innerHTML = `<font color="purple" size=6>  ${capitalizeFirstLetter(segment.speaker_id)}   :   ${capitalizeFirstLetter(segment.transcription)}</font>`;
+                  segmentElement.innerHTML = `<div class="chatContainer container-md">
+                            <img src="{{url_for('static',filename='/images/customer-service.png')}}" alt="Avatar">
+                            <p><b>${capitalizeFirstLetter(segment.speaker_id)}</b></p>
+                            <p>${capitalizeFirstLetter(segment.transcription)}</p>
+                          </div>`
+                  rttmContainer.appendChild(segmentElement);
+                  segmentElement.scrollIntoView();
+            }
+            } else if (segment.speaker_id === '01' || segment.speaker_id === '1' || segment.speaker_id === 'customer') {
+                segmentElement.classList.add('speaker-01');
+                const startFormatted = formatTime(segment.start_time);
+                const endFormatted = formatTime(segment.end_time);
+
+                // segmentElement.innerHTML = `<font color="green" size=6><i>  ${capitalizeFirstLetter(segment.speaker_id)}    :  ${capitalizeFirstLetter(segment.transcription)}<i></font>`;
+                
+                  segmentElement.innerHTML = `<div class="chatContainer darker container-md ">
+                            <img src="{{url_for('static',filename='/images/customer.png')}}" alt="Avatar">
+                            <p><b>${capitalizeFirstLetter(segment.speaker_id)}</b></p>
+                            <p>${capitalizeFirstLetter(segment.transcription)}</p>
+                            </div>`
+                
+                  rttmContainer.appendChild(segmentElement);
+                segmentElement.scrollIntoView();
+            } 
+            // else {
+            //   segmentElement.classList.add("Sil")
+            //   const startFormatted = formatTime(segment.start_time);
+            //   const endFormatted = formatTime(segment.end_time);
+
+            //   segmentElement.innerHTML = `<font color="purple"> ${segment.speaker_id}</font>${segment.transcription}`;
+            //   rttmContainer.appendChild(segmentElement);
+            //   segmentElement.scrollIntoView();
+            // }
+            
+            
+
+            previousSpeaker = segment.speaker_id; // Update the previous speaker
+            let index=rttmData.indexOf(segment)
+            rttmData.splice(index,1)
+        // }
+    });
+}
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+function formatTime(time) {
+    const hours = Math.floor(time / 3600);
+    const minutes = Math.floor((time % 3600) / 60);
+    const seconds = Math.floor(time % 60);
+
+    const formattedHours = hours.toString().padStart(2, '0');
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+    const formattedSeconds = seconds.toString().padStart(2, '0');
+    var fromattedMilliseconds = String(time.toString().split(".")[1]).substr(0,3);
+
+return `${formattedHours}:${formattedMinutes}:${formattedSeconds}.${fromattedMilliseconds}`;
+}
+
+function parseRTTMData() {
+    const rttmDatas = [];
+    var regions = [];
+    let start_time
+    let speaker_id
+    let  end_time
+    let transcription
+    let co
+    {% for row in values %}
+
+            start_time = parseFloat('{{row["start_time"]}}');
+            end_time = parseFloat('{{row["end_time"]}}');
+            speaker_id = '{{row["speaker_id"]}}';
+            if (speaker_id==="agent" || speaker_id==="00"|| speaker_id==="0")
+            {
+              co=0
+            }
+            else if (speaker_id==="customer" || speaker_id==="01" || speaker_id==="1"){
+              co=1
+            }
+            else{
+              co=2
+            }
+            // console.log(segments)
+            document.getElementById("area").textContent='{{row["transcription"]}}';
+            transcription=document.getElementById("area").textContent;
+            rttmDatas.push({ start_time, end_time, speaker_id, transcription});
+            regions.push({
+                start: start_time,
+                end: end_time,
+                label: speaker_id,
+                color: color[co], // Highlight color
+                drag: false, // Disable dragging
+                resize: false // Disable resizing
+              });
+    {% endfor %}
+
+    return [rttmDatas,regions];
+}
+let data = parseRTTMData();
+// console.log(data[0])
+rttmData=data[0]
+let regions=data[1]
+// console.log(rttmData)
+// console.log(regions)
+regions.forEach(function(region) {
+      wsRegions.addRegion(region);
+  });
+  wavesurfer.on("decode",()=> {
+    let minPxPerSec = Number(document.getElementById("zoom").value);
+    wavesurfer.zoom(minPxPerSec);
+    });
+  // Update the zoom level on slider change
+wavesurfer.once('decode', () => {
+  document.querySelector('input[type="range"]').oninput = (e) => {
+    const minPxPerSec = Number(e.target.value)
+    wavesurfer.zoom(minPxPerSec)
+  }
+});
+
+
+
+    </script>
+    <script>
+      function showSummary(){
+        var x = document.getElementById("summary");
+        if (x.style.display == "none") {
+          x.style.display = "block";
+        } else {
+          x.style.display = "none";        }
+      }
+      function showAutoQAResults(){
+        var x = document.getElementById("autoqa-results");
+        if (x.style.display == "none") {
+          x.style.display = "block";
+        } else {
+          x.style.display = "none";        }
+      }
+    </script>
+</body>
+
+</html>

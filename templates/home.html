@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/home.css') }}">
+  <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Call Player</h1>
+    <div class="option-block">
+        <div class="option-heading" onclick="toggleOption('pre-loaded')">
+          <h2>Choose an Existing File</h2>
+        </div>
+        <div class="option-content" id="pre-loaded">
+          <ul class="file-list">
+            {% for filename in filenames %}
+              <a href="sample_{{ loop.index }}"><li>{{ filename }}</li></a>
+            {% endfor %}
+          </ul>
+        </div>
+    </div>
+    <div class="option-block">
+      <div class="option-heading" onclick="toggleOption('upload-file')">
+        <h2>Upload a new audio file</h2>
+        <span class="toggle-icon">+</span>
+      </div>
+      <div id="upload-file" class="option-content">
+        <form method="POST" action="/upload" enctype="multipart/form-data" id="form">
+          <input type="file" name="wavfile" accept=".mp3, .wav">
+          <input type="submit" id="button" value="Upload" onclick="start()">
+        </form>
+      </div>
+    </div>
+    <div id="processing">
+      <img src="{{ url_for('static', filename='processing.gif') }}" id="img" alt="Processing the image">
+      <p>Processing...</p>
+    </div>
+  </div>
+
+  <script>
+    function toggleOption(id) {
+      var optionContent = document.getElementById(id);
+      var toggleIcon = optionContent.previousElementSibling.getElementsByClassName('toggle-icon')[0];
+
+      if (optionContent.style.display === 'block') {
+        optionContent.style.display = 'none';
+        toggleIcon.textContent = '+';
+      } else {
+        optionContent.style.display = 'block';
+        toggleIcon.textContent = '-';
+      }
+    }
+
+    function handleFileOption(select) {
+      var selectedValue = select.value;
+      var form = document.getElementById("form");
+      if (selectedValue) {
+        form.hidden = true;
+      } else {
+        form.hidden = false;
+      }
+    }
+
+    function start() {
+      var form = document.getElementById("form");
+      var processingDiv = document.getElementById("processing");
+      form.hidden = true;
+      processingDiv.style.display = "block";
+    }
+  </script>
+</body>
+</html>
+
+
