@@ -70,4 +70,20 @@ body {
     margin: 10px;
     font-size: larger;
     text-align: left;
-  }
+}
+.file-list a {
+    display: block;
+    text-decoration: none;
+}
+
+.file-list a:hover {
+    background-color: lightgray;
+}
+
+.file-list li.error {
+    background-color:  #ED4337;
+    color: white;
+}
+.file-list li.error a {
+    color: white;
+}
