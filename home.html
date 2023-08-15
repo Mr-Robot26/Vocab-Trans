@@ -1,14 +1,13 @@
-
 <!DOCTYPE html>
 <html>
 <head>
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/home.css') }}">
   <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
-  <style>
+  <!--/* Add styles for user icon */
   .user-icon {
-    width: 50px;
-    height: 50px;
+    width: 30px;
+    height: 30px;
     margin-right: 10px;
   }
   
@@ -16,13 +15,27 @@
   #selected-user {
     margin-top: 20px;
     font-weight: bold;
-  }
-</style>
+  }-->
+
 </head>
 <body>
-  <img src="{{url_for('static', filename='user_l.png')}}" alt="Logo" class="user-icon">
-  
-  
+  <!-- User Metadata Dropdown -->
+<!--<div class="user-metadata">
+  <div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="userMetadataDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Select User
+    </button>
+    <div class="dropdown-menu" aria-labelledby="userMetadataDropdown">
+      {% for user in users %}
+        <a class="dropdown-item" href="#" onclick="selectUser('{{ user.name }}', '{{ user.icon }}')">
+          <img src="{{ user.icon }}" alt="{{ user.name }} Icon" class="user-icon">
+          {{ user.name }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>-->
+
   <div class="container">
     <h1>Call Player</h1>
     
@@ -34,14 +47,21 @@
       <div class="option-content" id="pre-loaded">
         <ul class="file-list">
           {% for filename in filenames %}
+             {% if filename in error_file %}
+              <li class="error"><a href="call_{{ loop.index }}">{{ filename }}</a></li>
+              {% else %}
+               
             <a href="call_{{ loop.index }}"><li>{{ filename }}</li></a>
+            {% endif %}
           {% endfor %}
         </ul>
       </div>
     </div>
     
+    
     <!-- Upload a new audio file -->
-    <div class="option-block">
+    
+    <!--<div class="option-block">
       <div class="option-heading" onclick="toggleOption('upload-file')">
         <h2>Upload a new audio file</h2>
         <span class="toggle-icon">+</span>
@@ -53,6 +73,7 @@
         </form>
       </div>
     </div>
+    -->
     
     <!-- Processing Div -->
     <div id="processing">
@@ -81,8 +102,16 @@
       form.hidden = true;
       processingDiv.style.display = "block";
     }
-   
+    function selectUser(name, icon) {
+    // Update the selected user display
+    var selectedUserDisplay = document.getElementById("selected-user");
+    selectedUserDisplay.innerHTML = `
+      <img src="${icon}" alt="${name} Icon" class="user-icon">
+      Selected User: ${name}
+    `;
+
+    // You can perform any additional actions here based on the selected user
+  }
   </script>
 </body>
 </html>
-
