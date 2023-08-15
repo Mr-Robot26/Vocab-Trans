@@ -50,10 +50,7 @@
 .bordered-table tr:nth-child(even) {
   background-color: #f2f2f2; /* Adjust the background color as needed */
 }
-/* Add a class for the active row */
-.active-row {
-  background-color: #f2f2f2; /* Adjust the background color as needed */
-}
+
  .highlighted-heading {
     background-color: #3498db; /* Set your desired background color here */
     color: white; /* Set the text color for better visibility */
@@ -102,15 +99,100 @@ h3.unique-heading {
   padding-bottom: 10px; /* Space between the border and the text */
   margin-bottom: 20px; /* Space below the heading */
 }
+/* Add a class for the active row */
+.active-row {
+  background-color: #f2f2f2; /* Adjust the background color as needed */
+}
+.column-header {
+    font-weight: 900;/* Bolder font weight */
+    text-transform: uppercase;
+    overflow-y: auto;
+      height: 10px;
+       position: sticky;
+      top: 0;
+  }
+  .fixed-bottom-center {
+   display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px; /* Add space from the content */
+    padding-top: 20px; /* Add padding to create more space */
+    border-top: 1px solid #ccc; /* Optional: Add a separator line */
+  }
+  #transcription-table .column-header {
+  background-color: lightblue; /* Change color */
+  
+}
+  .styled-table tr.active {
+    background-color: yellow;
+  }
+  input[type="checkbox"] {
+  transform: scale(1.5); /* Adjust the scale factor to increase/decrease size */
+}
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
 
+.dropdown-button {
+  padding: 10px 20px;
+ 
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  
+}
 
-  </style>
+.dropdown-content {
+   display: none;
+  position: absolute;
+  top: 50%;
+  left: 100%; /* Place the content on the right side */
+  transform: translateY(-50%);
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {
+  background-color: #f1f1f1;
+}
+
+.dropdown.clicked .dropdown-content {
+  display: block;
+}
+
+   
+   
+
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const dropdownButton = document.querySelector(".dropdown-button");
+  const dropdown = document.querySelector(".dropdown");
+
+  dropdownButton.addEventListener("click", function() {
+    dropdown.classList.toggle("clicked");
+  });
+});
+
+</script>
+  
 </head>
 <body>
-
  <!-- Add the logo image -->
   <img src="{{url_for('static', filename='logo.png')}}" alt="Logo" class="logo">
   <img src="{{url_for('static', filename='logo2.png')}}" alt="Logo" class="logo2">
+  
+  
   <!-- Div fix will the div fixed on the screen -->
   <br><br><br><div id="divfix">
  <!-- Add a section to display user metadata -->
@@ -118,57 +200,67 @@ h3.unique-heading {
     <p><strong class="userMetadata">Username:</strong> <span id="username" class="username"></span></p>
     
   </div>
-
-
     <div class="text-center">
       <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"><a href="/">Home page</a></button>
     </div><br>
-    <div class="text-center">
-<button id="logoutButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">Logout</button>
-</div>
 
     <p id="time">00:00:00:000</p>
 
     <div class="text-center">
-      <label><input type="checkbox" checked="${loop}"> Loop regions on click</label>
+      <label><input type="checkbox" checked="${loop}"> Loop segments on click</label>
       <label style="margin-left: 2em">Zoom: <input type="range" min="1" max="1000" value={{zoom}} id="zoom"></label>
     </div>
+    
 
-    <div id="waveform"></div><br>
-
+    <div id="waveform"></div>
+     
     <div class="text-center">
+    <br><br>
       <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full" id="playpause">Play/Pause</button>
-    </div><br>
+    </div>
+        <br>
      <div class="text-center">
     <h1 class="unique-heading">Transcription</h1>
 </div>
-    
+
+   
     
 
-
+    
   </div>
-<div>
+
     <table class="styled-table bordered-table" id='transcription-table'>
-      <tr class="highlighted-heading"> <!-- Add this class to highlight the heading row -->
-    {% for column in columns %}
-      <td contenteditable="true" name="data_0_{{ loop.index }}">{{ column }}</td>
-    {% endfor %}
-  </tr>
+      <tr>
+    
+        {% for column in columns %}
+          
+          <td contenteditable="true" name="data_0_{{ loop.index }}"class="column-header">{{ column }}</td>
+          
+        {% endfor %}
+      </tr>
+      
       {% for row in data %}
         {% set outer_loop = loop %}
         <tr>
           {% for value in row %}
             <!-- Text Values which can be editted -->
+            
             {% if loop.index in editable %}
-              <td contenteditable="true" name="data_{{ outer_loop.index }}_{{ loop.index }}" id="data_{{ outer_loop.index }}_{{ loop.index }}" onclick="getCellName(this)">{{ value }}</td>
+              <td contenteditable="true" name="data_{{ outer_loop.index }}_{{ loop.index }}" id="data_{{ outer_loop.index }}_{{ loop.index }}" onclick="getCellName(this)">
+  {{ value }}
+  
+</td>
+
 
             <!-- Values which are uneditable -->
             {% elif loop.index in uneditable %}
               <td contenteditable="false" name="data_{{ outer_loop.index }}_{{ loop.index }}" id="data_{{ outer_loop.index }}_{{ loop.index }}" onclick="getCellName(this)">{{ value }}</td>
+              
 
             <!-- Dropdown options -->
             {% else %}
-              <td contenteditable="true" name="data_{{ outer_loop.index }}_{{loop.index}}" onclick="getCellName(this)">
+            
+            <td contenteditable="true" name="data_{{ outer_loop.index }}_{{loop.index}}" onclick="getCellName(this)">
                 <select id="data_{{ outer_loop.index }}_{{ loop.index }}">
                   <!-- Speaker id -->
                   {% if loop.index == 4 %}
@@ -179,34 +271,37 @@ h3.unique-heading {
                         <option value="{{ option }}">{{ option }}</option>
                       {% endif %}
                     {% endfor %}
+               
+                    
                   <!-- Actual Language -->
-                  {% elif loop.index == 9 %}
+                  {% elif loop.index == 8 %}
+                  
                     {% for option in languages %}
                       {% if option == value %}
                         <option value="{{ option }}" selected>{{ option }}</option>
                       {% else %}
                         <option value="{{ option }}">{{ option }}</option>
+                       
                       {% endif %}
                     {% endfor %}
                   {% endif %}
+                  
                 </select>
-            {% endif %}
+            {% endif %}            
+               
           {% endfor %}
+         
       {% endfor %}
+    
+      </tr>
+    
     </table>
-  </div>
-<div class="text-center">
+    
+    <div class="text-center">
     <h2 class="unique-heading">End of Transcription</h2>
 </div>   
-<form id="my-form" method="POST">
-      <div class="text-center">
-        <button id="cl" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow" type="button">Save</button>
-      </div>
-    </form>
-<!-- Discard Button -->
-    <div class="text-center mt-4">
-      <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full" id="discard" onclick="discardAudio()">Discard Audio</button>
-    </div><br>
+
+
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
     // Get the data from table as a dictionary and send it to the server
@@ -291,28 +386,7 @@ h3.unique-heading {
       
         window.location.href = 'base';
     }
-     // Fetch user metadata from the server
-fetch('/get_user_metadata')
-      .then(response => response.json())
-      .then(userMetadata => {
-        // Display user metadata on the webpage
-        const usernameElement = document.getElementById('username');
-        
-        usernameElement.textContent = userMetadata.username;
-        
-      })
-      .catch(error => console.error('Error fetching user metadata:', error));
-
     
-const logoutButton = document.getElementById('logoutButton'); // Update with the actual ID
-logoutButton.addEventListener('click', () => {
-    fetch('/logout', { method: 'POST' })
-        .then(() => {
-            // Redirect to login page after logout
-            window.location.href = '/login';
-        })
-        .catch(error => console.error('Error logging out:', error));
-});
 
   </script>
   <script type="module">
@@ -343,35 +417,15 @@ logoutButton.addEventListener('click', () => {
       }
     });
     
-    //While running highlight the active table row
-    wavesurfer.on("audioprocess", function() {
-    // Add this code inside the wavesurfer.on("audioprocess", function() {...} section
+    
+   //While running highlight the active table row
+   wavesurfer.on("audioprocess", function() {
+  const currentTime = wavesurfer.getCurrentTime();
+  document.getElementById("time").innerText = formatTime(currentTime);
+  highlightActiveSegment(currentTime);
+});
 
-function highlightActiveSegment(time) {
-  var table = document.getElementById('transcription-table');
-  var rows = table.getElementsByTagName('tr');
-
-  for (var i = 0; i < rows.length; i++) {
-    var row = rows[i];
-    var startTimeCell = row.cells[0];
-    var endTimeCell = row.cells[1];
-    var startTime = parseFloat(startTimeCell.textContent); // Parse as float
-    var endTime = parseFloat(endTimeCell.textContent); // Parse as float
-
-    if (time >= startTime && time <= endTime) {
-      row.classList.add('active');
-    } else {
-      row.classList.remove('active');
-    }
-  }
-}
-
-      const currentTime = wavesurfer.getCurrentTime();
-      document.getElementById("time").innerText = formatTime(currentTime);
-      highlightActiveSegment(currentTime);
-    });
-
-    function highlightActiveSegment(time) {
+ function highlightActiveSegment(time) {
       var table = document.getElementById('transcription-table');
       var rows = table.getElementsByTagName('tr');
       for (var i = 0; i < rows.length; i++) {
@@ -472,8 +526,106 @@ function highlightActiveSegment(time) {
         wavesurfer.zoom(minPxPerSec);
       };
     });
+    
+   
   </script>
+  <br>
+  <form id="my-form" method="POST">
+      <div class="text-center">
+        <button id="cl" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow" type="button">Save</button>
+      </div>
+    </form>
+  <!--<br><br>
+   <form id="my-form" method="POST">
+      <div class="text-center">
+        <button id="cl" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow" type="button">Save</button>
+      </div>
+    </form>
+  <br>
+  -->
+  
+  <!-- Discard Button -->
+  <!--
+  <div class="fixed-bottom-center">
+      <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full" id="discard" onclick="discardAudio()">Discard Audio</button>
+    </div>
+    -->
+
+   <div class="fixed-bottom-center">
+  <div class="dropdown">
+    <button class="dropdown-button bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full">
+      Discard Audio
+    </button>
+    <div class="dropdown-content">
+      <a href="#" onclick="discardOption('Segmentation error')">Segmentation error</a>
+      <a href="#" onclick="discardOption('Language mismatch')">Language mismatch</a>
+      <a href="#" onclick="discardOption('Transcription error')">Transcription error</a>
+      <a href="#" id='button'>Other</a>
+    </div>
+  </div>
+</div>
+ <div id="result"></div>
+  <script>
+  var otherReasonText = ''; // Define a variable to store the input text
+
+    var el = document.getElementById('button');
+    el.onclick = function() {
+        var my_text = prompt('Enter Other Reason:');
+        if (my_text) {
+            otherReasonText = my_text; // Capture the input text
+        }
+        window.location.href = 'base';
+        fetch('/process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 'selectedOption': otherReasonText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').textContent = data.result;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+  
+            
+           
+            
+    };
+
+        function discardOption(option) {
+        console.log(option);
+
+           // Use the captured input text from the prompt, if available
+          
+       
+         window.location.href = 'base';
+         
+            fetch('/process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 'selectedOption': option })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').textContent = data.result;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+            
+        }
+    </script>
+     <br><br><br><br><br>
   <a href="/done"><button id="hide" hidden="true">Download</button></a>
+  
+ 
+  
+
 </body>
 
 </html>
