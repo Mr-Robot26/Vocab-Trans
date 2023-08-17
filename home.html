@@ -48,7 +48,14 @@
         <ul class="file-list">
           {% for filename in filenames %}
              {% if filename in error_file %}
-              <li class="error"><a href="call_{{ loop.index }}">{{ filename }}</a></li>
+              <li class="error"><a href="call_{{ loop.index }}">
+                {{ filename }}<span class="additional-text">{{ reason[loop.index - 1]}}</span>
+              </a></li>
+              {%elif filename in onprogress%}
+              <li class="onprogress"><a href="call_{{ loop.index }}">{{ filename }}</a></li>
+              
+              {%elif filename in savedfile%}
+              <li class="save"><a href="call_{{ loop.index }}">{{ filename }}</a></li>
               {% else %}
                
             <a href="call_{{ loop.index }}"><li>{{ filename }}</li></a>
