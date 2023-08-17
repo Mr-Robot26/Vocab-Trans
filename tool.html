@@ -106,9 +106,15 @@ h3.unique-heading {
 .column-header {
     font-weight: 900;/* Bolder font weight */
     text-transform: uppercase;
+    color: white;
     overflow-y: auto;
       height: 10px;
        position: sticky;
+       text-shadow: 
+    -1px -1px 0 black,
+     1px -1px 0 black,
+    -1px 1px 0 black,
+     1px 1px 0 black;
       top: 0;
   }
   .fixed-bottom-center {
@@ -175,6 +181,7 @@ h3.unique-heading {
 
 </style>
 <script>
+ 
 document.addEventListener("DOMContentLoaded", function() {
   const dropdownButton = document.querySelector(".dropdown-button");
   const dropdown = document.querySelector(".dropdown");
@@ -183,6 +190,24 @@ document.addEventListener("DOMContentLoaded", function() {
     dropdown.classList.toggle("clicked");
   });
 });
+
+$(document).ready(function() {
+    // Load checkbox states from Local Storage
+    $('.above-checkbox').each(function(index, checkbox) {
+      var checkboxId = $(checkbox).attr('id');
+      var isChecked = localStorage.getItem(checkboxId);
+      if (isChecked) {
+        $(checkbox).prop('checked', true);
+      }
+    });
+    
+    // Save checkbox state to Local Storage on change
+    $('.above-checkbox').change(function() {
+      var checkboxId = $(this).attr('id');
+      var isChecked = $(this).prop('checked');
+      localStorage.setItem(checkboxId, isChecked);
+    });
+  });
 
 </script>
   
@@ -228,39 +253,36 @@ document.addEventListener("DOMContentLoaded", function() {
 
     
   </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <table class="styled-table bordered-table" id='transcription-table'>
-      <tr>
+  <table class="styled-table bordered-table" id='transcription-table'>
+    <tr>
+      {% for column in columns %}
+        <td contenteditable="true" name="data_0_{{ loop.index }}" class="column-header">{{ column }}</td>
+      {% endfor %}
+    </tr>
     
-        {% for column in columns %}
+    {% for row in data %}
+      {% set outer_loop = loop %}
+      <tr>
+        {% for value in row %}
+          <!-- Text Values which can be edited -->
+          {% if loop.index in editable %}
+            <td contenteditable="true" name="data_{{ outer_loop.index }}_{{ loop.index }}" id="data_{{ outer_loop.index }}_{{ loop.index }}" onclick="getCellName(this)">{{ value }}</td>
           
-          <td contenteditable="true" name="data_0_{{ loop.index }}"class="column-header">{{ column }}</td>
+          <!-- Values which are uneditable -->
+          {% elif loop.index in uneditable %}
+            <td contenteditable="false" name="data_{{ outer_loop.index }}_{{ loop.index }}" id="data_{{ outer_loop.index }}_{{ loop.index }}" onclick="getCellName(this)">{{ value }}</td>
           
-        {% endfor %}
-      </tr>
-      
-      {% for row in data %}
-        {% set outer_loop = loop %}
-        <tr>
-          {% for value in row %}
-            <!-- Text Values which can be editted -->
-            
-            {% if loop.index in editable %}
-              <td contenteditable="true" name="data_{{ outer_loop.index }}_{{ loop.index }}" id="data_{{ outer_loop.index }}_{{ loop.index }}" onclick="getCellName(this)">
-  {{ value }}
-  
-</td>
-
-
-            <!-- Values which are uneditable -->
-            {% elif loop.index in uneditable %}
-              <td contenteditable="false" name="data_{{ outer_loop.index }}_{{ loop.index }}" id="data_{{ outer_loop.index }}_{{ loop.index }}" onclick="getCellName(this)">{{ value }}</td>
-              
-
-            <!-- Dropdown options -->
-            {% else %}
-            
+          <!-- Dropdown options -->
+          {% else %}
             <td contenteditable="true" name="data_{{ outer_loop.index }}_{{loop.index}}" onclick="getCellName(this)">
+              <!--check box-->
+              {% if loop.index == 9 %}
+              
+              <input type="checkbox" class="above-checkbox" id="data_{{ outer_loop.index }}_{{ loop.index }}" name="data_{{ outer_loop.index }}_{{ loop.index }}" value="{{ value }} " onclick="sendCheckboxValue(this, {{ outer_loop.index }}, {{ loop.index }}, '{{ value }}')"{% if value == true %}checked{% endif %}>
+    
+              {% else %}
                 <select id="data_{{ outer_loop.index }}_{{ loop.index }}">
                   <!-- Speaker id -->
                   {% if loop.index == 4 %}
@@ -271,31 +293,66 @@ document.addEventListener("DOMContentLoaded", function() {
                         <option value="{{ option }}">{{ option }}</option>
                       {% endif %}
                     {% endfor %}
-               
-                    
                   <!-- Actual Language -->
                   {% elif loop.index == 8 %}
-                  
                     {% for option in languages %}
                       {% if option == value %}
                         <option value="{{ option }}" selected>{{ option }}</option>
                       {% else %}
                         <option value="{{ option }}">{{ option }}</option>
-                       
                       {% endif %}
                     {% endfor %}
                   {% endif %}
-                  
                 </select>
-            {% endif %}            
-               
-          {% endfor %}
-         
-      {% endfor %}
-    
+              {% endif %}
+            </td>
+          {% endif %}
+        {% endfor %}
       </tr>
-    
-    </table>
+    {% endfor %}
+  </table>
+  <script>
+    $(document).ready(function () {
+      // Load checkbox states from Local Storage
+      $('.above-checkbox').each(function () {
+        var checkboxId = $(this).attr('id');
+        var isChecked = localStorage.getItem(checkboxId);
+        if (isChecked === 'true') {
+          $(this).prop('checked', true);
+        }
+      });
+  
+      // Save checkbox state to Local Storage on change
+      $('.above-checkbox').change(function () {
+        var checkboxId = $(this).attr('id');
+        var isChecked = $(this).prop('checked');
+        localStorage.setItem(checkboxId, isChecked);
+      });
+    });
+//check box to python variable
+    function sendCheckboxValue(checkboxElement, rowIndex, columnIndex, selectedValue) {
+   // Determine if the checkbox is checked or not
+   var isChecked = checkboxElement.checked;
+
+// Convert the checkbox status to 1 if checked, 0 if unchecked
+var selectedValue = isChecked ? '1' : '0';
+
+fetch('/processcheckbox', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ 'selectedValue': selectedValue })
+})
+.then(response => response.json())
+.then(data => {
+  document.getElementById('result').textContent = data.result;
+})
+.catch(error => {
+  console.error('Error:', error);
+});
+}
+  </script>
     
     <div class="text-center">
     <h2 class="unique-heading">End of Transcription</h2>
@@ -305,6 +362,7 @@ document.addEventListener("DOMContentLoaded", function() {
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
     // Get the data from table as a dictionary and send it to the server
+
     $(document).ready(function() {
       $("#cl").click(function(event) {
         event.preventDefault();
@@ -532,7 +590,7 @@ document.addEventListener("DOMContentLoaded", function() {
   <br>
   <form id="my-form" method="POST">
       <div class="text-center">
-        <button id="cl" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow" type="button">Save</button>
+        <button id="cl" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow" type="button" onclick="save()">Save</button>
       </div>
     </form>
   <!--<br><br>
@@ -561,6 +619,7 @@ document.addEventListener("DOMContentLoaded", function() {
       <a href="#" onclick="discardOption('Language mismatch')">Language mismatch</a>
       <a href="#" onclick="discardOption('Transcription error')">Transcription error</a>
       <a href="#" id='button'>Other</a>
+      
     </div>
   </div>
 </div>
@@ -570,7 +629,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     var el = document.getElementById('button');
     el.onclick = function() {
-        var my_text = prompt('Enter Other Reason:');
+        var my_text = prompt("Enter Other Reason:\nNote:If there's no other reason enter OK");
         if (my_text) {
             otherReasonText = my_text; // Capture the input text
         }
@@ -594,6 +653,9 @@ document.addEventListener("DOMContentLoaded", function() {
            
             
     };
+    function save(){
+      window.location.href = 'base';
+    }
 
         function discardOption(option) {
         console.log(option);
