@@ -96,7 +96,7 @@ def sample(name):
     
     # Save the Excel file to the specified path
     #excel_file.save(excel_file_path)
-
+    
     # Replace the file extension to '.wav' for the WAV file
     filename = filename.replace(".xlsx", ".wav")
     
@@ -140,13 +140,16 @@ def home():
 # Insert an extra column name
     extra_column_name = "Flag"
     columns.insert(9, extra_column_name)
-    columns=['start time', 'end time', 'speaker id', 'act id', 'transcript', 'actual transcript','language', 'actual language', 'Flag']
-
+    columns=['start time', 'end time', 'speaker id', 'act id', 'transcript', 'actual transcript','id','language', 'actual language', 'Flag']
+    if len(df.columns)>8:
+      df.columns=columns[:-1]
     print("After:", columns)
     df[['start time', 'end time']] = df[['start time', 'end time']].round(1)
     if 'id' in df.columns:
        df=df.drop(['id'],axis=1)
+    columns.remove('id')
     # Extract the data from the DataFrame
+    df['flag']=0
     data = df.iloc[:, 0:].values.tolist()
     
     # Create a set of unique speaker IDs from the "speaker_id" column in the Excel file
@@ -167,7 +170,7 @@ def home():
     if zoom>1000:
         zoom=1000
     # Render the 'index.html' template and pass the variables to it
-    return render_template('toolold.html', columns=columns, data=data, wav_path=wav_path, options=options,languages=languages,editable=editable,uneditable=uneditable, zoom=zoom)
+    return render_template('tool.html', columns=columns, data=data, wav_path=wav_path, options=options,languages=languages,editable=editable,uneditable=uneditable, zoom=zoom)
 
 
 @app.route("/")
@@ -183,31 +186,46 @@ def base():
     folder_path = os.path.join(app.config['STATIC_FOLDER'], "pre-loaded", f"Call {num}")
     session['folder_path']=folder_path
     file_names=os.listdir("static/pre-loaded")
-    
     error_file=[]
+    savedfile=[]
+    reason=[]
+    onprogress=[]
+    file_names.remove('.DS_Store')
     for i in range(len(file_names)):
         file_names[i]="Call "+str(i+1)
         path=session['folder_path'][:-1]+str(i+1)
-        if  'reason.txt' in os.listdir(path) :
+        if  'reason.txt' in os.listdir(path):
            with open(path+'/reason.txt', 'r') as file:
-            if file.read() !='':
-                error_file.append("Call "+str(i+1))
-              
+            text=file.read()
+            if text == 'Saved Succesfully':
+                reason.append(text)
+                savedfile.append("Call "+str(i+1))
+            if text=='On progress':
+                reason.append(text)
+                onprogress.append("Call "+str(i+1))
+            if text !='' and  text != 'Saved Succesfully' and text!='On progress':
+                    reason.append(text)
+                    error_file.append("Call "+str(i+1))
             
-    return render_template("home.html",filenames=file_names,error_file=error_file)
+    print(onprogress)     
+    return render_template("home.html",filenames=file_names,error_file=error_file,savedfile=savedfile,reason=reason,onprogress=onprogress)
 
 
 @app.route('/save', methods=['POST','GET'])
 def save():
     # Retrieve the JSON data from the request
-    print('******************************df.shape********************************************')
+   
     data = request.get_json()
-    print('******************************df.shape********************************************')
+    file_path=session['folder_path']+"/reason.txt"
+    with open(file_path, 'w') as file:
+                file.write('Saved Succesfully')
+                print(f"Text saved to {file_path} successfully.")
     # Create an empty dictionary to store the data
     out_dict = {}
 
     # Read the Excel file using pandas
     df = pd.read_excel(session.get("excel_file_path"))
+
     if 'id' in df.columns:
         df=df.drop(['id'],axis=1)
     # Get the number of rows and columns in the DataFrame
@@ -228,7 +246,6 @@ def save():
     final_df = pd.DataFrame(out_dict)
     
     # Overwrite the existing Excel file with the updated DataFrame
-
     final_df.to_excel(session.get('excel_file_path'), index=False)
 
     final_df.to_csv(session.get('csv_file_path'), index=False)
@@ -241,9 +258,12 @@ def save():
 @app.route('/process', methods=['POST'])
 def process():
     data = request.get_json()
+    session['result']=" "
     
     selected_option = data['selectedOption']
     
+
+   
     
     # Process the selected option (you can replace this with your own logic)
     if selected_option == 'cancel':
@@ -256,10 +276,21 @@ def process():
     with open(file_path, 'w') as file:
             file.write(result)
             print(f"Text saved to {file_path} successfully.")
+    session['result'] = result
     return redirect(url_for('base'))
 
-    
-    
+@app.route('/processcheckbox', methods=['POST'])
+def  processcheckbox():
+    data = request.get_json()
+    selected_value = int(data['selectedValue'])
+    if (selected_value):
+        result='On progress'
+        file_path=session['folder_path']+"/reason.txt"
+        with open(file_path, 'w') as file:
+            file.write(result)
+            print(f"Text saved to {file_path} successfully.")
+    session['result'] = result
+    return redirect(url_for('base'))
     
 @app.route("/done", methods=['POST','GET'])
 def done():
@@ -276,4 +307,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0",debug=True, port=7000)
+    app.run(host="0.0.0.0",debug=True, port=5000)
